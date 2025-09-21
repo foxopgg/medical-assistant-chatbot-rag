@@ -1,122 +1,64 @@
-# Conversational RAG Chatbot
+# Multilingual Medical Assistant Chatbot
 
-This project is a complete, end-to-end Conversational Retrieval-Augmented Generation (RAG) system. It allows you to build a sophisticated chatbot that can answer questions based on a private collection of PDF documents. The entire pipeline, from data ingestion to a user-friendly web interface, is included.
+This project is a sophisticated, multilingual medical assistant chatbot that uses a **Retrieval-Augmented Generation (RAG)** architecture to answer medical questions based on a provided knowledge base. It leverages the power of Google's **Gemini API** for language understanding and generation, supports conversation history, an deployed  **Telegram** 
 
 ## Features
 
-* **End-to-End Data Pipeline**: A series of scripts to automatically process raw documents and prepare them for the RAG system.
-    * **Advanced Document Ingestion**: Extracts text and tables from PDFs, with an automatic OCR fallback for scanned documents.
-    * **Intelligent Text Cleaning**: A multi-step cleaning process to normalize text, remove noise, and filter out low-quality content.
-    * **Content-Aware Chunking**: Splits documents into meaningful chunks, keeping tables intact and filtering out "stub" chunks.
-    * **Incremental Processing**: All pipeline steps are incremental, only processing new or updated files to save time and resources.
-* **Conversational AI Core**:
-    * **State-of-the-Art RAG Chain**: Uses a modern, conversational RAG chain that remembers chat history to answer follow-up questions.
-    * **Powered by Gemini**: Leverages Google's Gemini Pro for high-quality, context-aware answer generation.
-    * **Source-Cited Answers**: The chatbot returns the source documents it used to generate an answer, providing transparency and trust.
-* **Web Interface**:
-    * **FastAPI Backend**: A robust and efficient API to serve the RAG chain.
-    * **Streamlit Frontend**: A user-friendly, interactive chat interface for easy interaction with the chatbot.
-
-## Tech Stack
-
-* **Backend**: Python, FastAPI
-* **Frontend**: Streamlit
-* **LLM**: Google Gemini 1.5 Flash via `langchain-google-genai`
-* **Embeddings**: `intfloat/multilingual-e5-large`
-* **Vector Store**: FAISS 
-* **Orchestration**: LangChain
-* **Data Processing**: PyPDF2, pdfplumber, pytesseract, python-docx
-
-
+-   **Retrieval-Augmented Generation (RAG)**: The chatbot answers questions based on a custom medical knowledge base, ensuring factual and relevant responses. It uses a FAISS vector store for efficient document retrieval.
+-   **Powered by Gemini**: Utilizes Google's powerful `gemini-1.5-flash` model for high-quality, fast, and context-aware responses.
+-   **Multilingual Support**: Can understand and respond in multiple languages, including English, Marathi, Urdu, Tamil, and Telugu.
+-   **Conversation Memory**: Remembers the context of the conversation for each user, allowing for natural, follow-up questions.
+-   **Asynchronous API**: Built with **FastAPI** for a high-performance, scalable backend.
 
 ## Project Structure
-
 ```bash
-├── api/
-│   └── app.py                # FastAPI application
-├── chunks/                   # Stores the chunked documents
-├── data/                     # Raw PDF documents go here
-├── embeddings/ 
-│   ├── create_embeddings.py  # Script to generate embeddings
-│   └── load_to_faiss.py      # Loads the Embeddings into FAISS
-├── frontend/
-│   └── app.py                # Streamlit frontend application
-├── ingestion/
-│   └── load_documents.py     # Script to ingest and clean documents
-├── processing/
-│   └── chunks_documents.py   # Script to chunk the cleaned documents
-├── query/
-│   └── query_faiss.py        # CLI tool to test FAISS index
-├── rag/
-│   ├── config.py             # Configuration for the RAG chain
-│   ├── memory_buffer.py      # Manages conversational memory
-│   └── rag_chain.py          # Main RAG chain 
-├── .env                      # Store API keys (need to be created)
-└── .gitignore                # Git ignore rules
+├── api.py                     # FastAPI server with webhook endpoints
+├── chatbot_logic.py           # Core RAG Chain
+├── telegram_bot.py            # Script to connect to Telegram
+├── data/
+│   └── medical_text_data.csv  # Medical data
+├── .env                       # Api key and Variables
+└── requirements.txt           # All dependencies
 ```
 
+## Getting Started
 
-## Setup and Installation
+Follow these steps to set up and run the project on your local machine.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone <https://github.com/Sanjjjayyy/Language_Agnostic_Chatbot>
-    cd <Language Agnostic Chatbot>
-    ```
 
-2.  **Set up a Conda environment:**
-    ```bash
-    conda create --name rag-chatbot python=3.10
-    conda activate rag-chatbot
-    ```
+### 1. Clone the Repository
 
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
+```bash
+git clone <https://github.com/Sanjjjayyy/medical-assistant-chatbot-rag>
+cd medical-assistant-chatbot-rag
+```
+### 2. Set up a Conda environment
+```bash
+conda create --name med-assistant python=3.10
+conda activate med-assistant
+```
 
-4.  **Create the `.env` file:**
-    In the root directory of the project, create a file named `.env` and add your API key:
-    ```
-    GOOGLE_API_KEY="YOUR_API_KEY_HERE"
-    ```
+### 3. Install Dependencies
+ Install all the required Python packages using the `requirements.txt` file.
 
-##  Usage
+``` bash
+pip install -r requirements.txt
+```
+### 4. Set Up Environment Variables
 
-The project is divided into two main parts: the data pipeline and the live application.
+Create a `.env` file to store environment variables
 
-### Part 1: Running the Data Pipeline
+Add your keys:
+ - GOOGLE_API_KEY → from Google AI Studio
+ - TELEGRAM_TOKEN → via @BotFather on Telegram
+ - FASTAPI_URL → leave blank for now
 
-You must run these scripts in order from the root directory.
+### 5. Run the Application
 
-1.  **Add Documents**: Place all your PDF and DOCX files into the `data/` folder.
+You’ll need 3 terminals.
 
-2.  **Ingest and Clean Documents**:
-    ```bash
-    python -m ingestion.load_documents
-    ```
+**Terminal 1: Start FastAPI Server**
 
-3.  **Chunk the Documents**:
-    ```bash
-    python -m processing.chunks_documents
-    ```
-
-4.  **Create Embeddings**:
-    ```bash
-    python -m embeddings.create_embeddings
-    ```
-
-5.  **Build the FAISS Index**:
-    ```bash
-    python -m embeddings.load_to_faiss
-    ```
-    After this step, your knowledge base is ready.
-
-### Part 2: Running the Chatbot Application
-
-This requires two separate terminals, both running from the project's root directory.
-
-**Terminal 1: Start the Backend API**
 ```bash
 conda activate rag-chatbot
 uvicorn api.app:app --reload --port 8000
@@ -124,9 +66,30 @@ uvicorn api.app:app --reload --port 8000
 
 Wait for the message indicating the application startup is complete.
 
-**Terminal 2: Start the Frontend UI**
+**Terminal 2: Expose with ngrok**
+
+Authenticate ngrok (once):
 ```bash
-conda activate rag-chatbot
-streamlit run frontend/app.py
+ngrok config add-authtoken <YOUR_NGROK_AUTHTOKEN>
 ```
-This will open a new tab in your web browser with the chatbot interface. You can now start asking questions.
+Start tunnel:
+```bash
+ngrok 8000
+```
+After running it,you can see a forwarding URL
+
+Copy the https:// forwarding URL from ngrok.
+Update `.env` →
+
+```bash
+FASTAPI_URL=https://<your-ngrok-url>.ngrok-free.app/chat
+```
+Make Sure to Add `/chat` at the end of url.
+
+**Terminal 3: Run Telegram Bot**
+
+
+```bash
+python telegram_bot.py
+```
+Now you can ask Questions to Your Multilingual Medical Chatbot at Telegram
